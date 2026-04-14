@@ -1,12 +1,12 @@
 // utils/config-negocio.js - VERSIÓN MULTI-TENANT CORREGIDA
-// CLIENTE: Perlas Preciosas
+// CLIENTE: Yanis Nails
 
 console.log('🏢 config-negocio.js cargado');
 
 // ============================================
 // 🔥 CONFIGURACIÓN POR CLIENTE - ¡LO ÚNICO QUE CAMBIA!
 // ============================================
-const NEGOCIO_ID_POR_DEFECTO = '113a6f79-5f6b-4c33-a730-a5bb2fc4739c'; // ID de Perlas Preciosas
+const NEGOCIO_ID_POR_DEFECTO = '3585aca0-8ebc-46c1-b3ed-3445e249cef7'; // ID de Yanis Nails
 
 // Hacer accesible globalmente
 window.NEGOCIO_ID_POR_DEFECTO = NEGOCIO_ID_POR_DEFECTO;
@@ -116,7 +116,7 @@ window.cargarConfiguracionNegocio = async function(forceRefresh = false) {
  */
 window.getNombreNegocio = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.nombre || 'Perlas Preciosas';
+    return config?.nombre || 'Yanis Nails';
 };
 
 /**
@@ -124,7 +124,7 @@ window.getNombreNegocio = async function() {
  */
 window.getTelefonoDuenno = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.telefono || '55323834';
+    return config?.telefono || '59459219';
 };
 
 /**
@@ -132,7 +132,7 @@ window.getTelefonoDuenno = async function() {
  */
 window.getEmailNegocio = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.email || 'perlaspreciosaskathy99@gmail.com';
+    return config?.email || 'ariasmayedoy@gmail.com';
 };
 
 /**
@@ -164,7 +164,7 @@ window.getHorarioAtencion = async function() {
  */
 window.getMensajeBienvenida = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.mensaje_bienvenida || '¡Bienvenida a Perlas Preciosas!';
+    return config?.mensaje_bienvenida || '¡Bienvenida a Yanis Nails!';
 };
 
 /**
@@ -180,7 +180,7 @@ window.getMensajeConfirmacion = async function() {
  */
 window.getNtfyTopic = async function() {
     const config = await window.cargarConfiguracionNegocio();
-    return config?.ntfy_topic || 'perlas-preciosas';
+    return config?.ntfy_topic || 'yanisnails';
 };
 
 /**
@@ -205,5 +205,5 @@ setTimeout(async () => {
     await window.cargarConfiguracionNegocio();
 }, 500);
 
-console.log('✅ config-negocio.js listo para Perlas Preciosas');
+console.log('✅ config-negocio.js listo para Yanis Nails');
 console.log('🏷️  ID configurado:', NEGOCIO_ID_POR_DEFECTO);

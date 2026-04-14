@@ -1,22 +1,22 @@
-// sw.js - Service Worker para Perlas Preciosas
+// sw.js - Service Worker para Yanis Nails
 
-const CACHE_NAME = 'perlas-preciosas-v1';
+const CACHE_NAME = 'yanisnails-v1';
 const urlsToCache = [
-  '/perlas-preciosas/',
-  '/perlas-preciosas/index.html',
-  '/perlas-preciosas/admin.html',
-  '/perlas-preciosas/admin-login.html',
-  '/perlas-preciosas/setup-wizard.html',
-  '/perlas-preciosas/editar-negocio.html',
-  '/perlas-preciosas/manifest.json',
-  '/perlas-preciosas/icons/icon-72x72.png',
-  '/perlas-preciosas/icons/icon-96x96.png',
-  '/perlas-preciosas/icons/icon-128x128.png',
-  '/perlas-preciosas/icons/icon-144x144.png',
-  '/perlas-preciosas/icons/icon-152x152.png',
-  '/perlas-preciosas/icons/icon-192x192.png',
-  '/perlas-preciosas/icons/icon-384x384.png',
-  '/perlas-preciosas/icons/icon-512x512.png'
+  '/yanisnails/',
+  '/yanisnails/index.html',
+  '/yanisnails/admin.html',
+  '/yanisnails/admin-login.html',
+  '/yanisnails/setup-wizard.html',
+  '/yanisnails/editar-negocio.html',
+  '/yanisnails/manifest.json',
+  '/yanisnails/icons/icon-72x72.png',
+  '/yanisnails/icons/icon-96x96.png',
+  '/yanisnails/icons/icon-128x128.png',
+  '/yanisnails/icons/icon-144x144.png',
+  '/yanisnails/icons/icon-152x152.png',
+  '/yanisnails/icons/icon-192x192.png',
+  '/yanisnails/icons/icon-384x384.png',
+  '/yanisnails/icons/icon-512x512.png'
 ];
 
 // ============================================
@@ -108,7 +108,7 @@ self.addEventListener('fetch', event => {
           }
           // Si no hay cache y es imagen, devolver icon por defecto
           if (event.request.url.match(/\.(jpg|jpeg|png|gif|svg|webp)$/)) {
-            return caches.match('/perlas-preciosas/icons/icon-192x192.png');
+            return caches.match('/yanisnails/icons/icon-192x192.png');
           }
           return new Response('Error de red', { status: 408 });
         });
@@ -138,6 +138,6 @@ self.addEventListener('message', event => {
   }
 });
 
-console.log('✅ Service Worker configurado para Perlas Preciosas');
+console.log('✅ Service Worker configurado para Yanis Nails');
 console.log('📦 Cache:', CACHE_NAME);
 console.log('📄 Archivos a cachear:', urlsToCache.length);
