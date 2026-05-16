@@ -29,7 +29,6 @@ function ClientApp() {
     const [bookingConfirmed, setBookingConfirmed] = React.useState(null);
     const [userRol, setUserRol] = React.useState('cliente');
     const [history, setHistory] = React.useState(['auth']);
-    const [horariosPorDia, setHorariosPorDia] = React.useState({});
 
     // ============================================
     // DETECTAR SESIÓN AL INICIAR Y REDIRIGIR SEGÚN ROL
@@ -152,25 +151,6 @@ function ClientApp() {
         navigateTo('service');
     };
 
-    const handleServiceSelect = (service) => {
-        setSelectedService(service);
-        setSelectedProfesional(null);
-        setSelectedDate('');
-        setSelectedTime('');
-        setHorariosPorDia({});
-        setTimeout(() => {
-            document.getElementById('profesional-section')?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-        }, 150);
-    };
-
-    const handleNoAvailability = React.useCallback(() => {
-        setSelectedDate('');
-        setSelectedTime('');
-    }, []);
-
     const handleLogout = () => {
         localStorage.removeItem('clienteAuth');
         setCliente(null);
@@ -247,26 +227,18 @@ function ClientApp() {
                         <div className="max-w-3xl mx-auto px-4 py-6 space-y-6 pb-20">
                             {/* SECCIÓN 1: SERVICIOS */}
                             <ServiceSelection 
-                                onSelect={handleServiceSelect} 
+                                onSelect={setSelectedService} 
                                 selectedService={selectedService}
                             />
                             
                             {/* SECCIÓN 2: PROFESIONALES - CON selectedService */}
                             {selectedService && (
                                 <div id="profesional-section">
-                                    {selectedService.esMultiple ? (
-                                        <MultiProfesionalSelector
-                                            onSelect={setSelectedProfesional}
-                                            selectedProfesional={selectedProfesional}
-                                            selectedService={selectedService}
-                                        />
-                                    ) : (
-                                        <ProfesionalSelector
-                                            onSelect={setSelectedProfesional}
-                                            selectedProfesional={selectedProfesional}
-                                            selectedService={selectedService}
-                                        />
-                                    )}
+                                    <ProfesionalSelector 
+                                        onSelect={setSelectedProfesional} 
+                                        selectedProfesional={selectedProfesional}
+                                        selectedService={selectedService}
+                                    />
                                 </div>
                             )}
                             
@@ -276,10 +248,7 @@ function ClientApp() {
                                     <Calendar 
                                         onDateSelect={setSelectedDate} 
                                         selectedDate={selectedDate}
-                                        profesional={selectedProfesional?.esMultiple ? selectedProfesional.asignaciones[0]?.profesional : selectedProfesional}
-                                        profesionalCompleto={selectedProfesional}
-                                        service={selectedService}
-                                        onHorariosCargados={setHorariosPorDia}
+                                        profesional={selectedProfesional}
                                     />
                                 </div>
                             )}
@@ -287,25 +256,13 @@ function ClientApp() {
                             {/* SECCIÓN 4: HORARIOS */}
                             {selectedDate && (
                                 <div id="time-section">
-                                    {selectedService.esMultiple ? (
-                                        <MultiTimeSlots
-                                            service={selectedService}
-                                            date={selectedDate}
-                                            profesional={selectedProfesional}
-                                            onTimeSelect={setSelectedTime}
-                                            selectedTime={selectedTime}
-                                            onNoAvailability={handleNoAvailability}
-                                        />
-                                    ) : (
-                                        <TimeSlots
-                                            service={selectedService}
-                                            date={selectedDate}
-                                            profesional={selectedProfesional}
-                                            onTimeSelect={setSelectedTime}
-                                            selectedTime={selectedTime}
-                                            horariosPorDia={horariosPorDia}
-                                        />
-                                    )}
+                                    <TimeSlots 
+                                        service={selectedService}
+                                        date={selectedDate}
+                                        profesional={selectedProfesional}
+                                        onTimeSelect={setSelectedTime}
+                                        selectedTime={selectedTime}
+                                    />
                                 </div>
                             )}
                             

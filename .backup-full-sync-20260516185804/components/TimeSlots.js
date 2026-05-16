@@ -5,11 +5,9 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
     const [horariosPorDia, setHorariosPorDia] = React.useState({});
-    const [descansosPorDia, setDescansosPorDia] = React.useState({});
     const [diaTrabaja, setDiaTrabaja] = React.useState(true);
     const [verificacionCompleta, setVerificacionCompleta] = React.useState(false);
     const [maxAntelacionDias, setMaxAntelacionDias] = React.useState(30);
-    const [minAntelacionHoras, setMinAntelacionHoras] = React.useState(2);
 
     const indiceToHoraLegible = (indice) => {
         const horas = Math.floor(indice / 2);
@@ -25,9 +23,6 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                     console.log('⚙️ Configuración cargada en TimeSlots:', config);
                     if (config && config.max_antelacion_dias) {
                         setMaxAntelacionDias(config.max_antelacion_dias);
-                    }
-                    if (config && config.min_antelacion_horas !== undefined) {
-                        setMinAntelacionHoras(config.min_antelacion_horas);
                     }
                 }
             } catch (error) {
@@ -57,65 +52,6 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
         return hours * 60 + minutes;
     };
 
-    const variantesHorarioPermitido = (timeStr) => {
-        const partes = String(timeStr || '').trim().split(':');
-        if (partes.length < 2) return [];
-        const hours = parseInt(partes[0], 10);
-        const minutes = parseInt(partes[1], 10);
-        if (Number.isNaN(hours) || Number.isNaN(minutes)) return [];
-
-        const normal = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-        const variantes = [normal];
-        if (hours >= 1 && hours <= 7) {
-            variantes.push(`${String(hours + 12).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`);
-        }
-        return variantes;
-    };
-
-    const servicioPermiteHorario = (servicio, slot) => {
-        const permitidos = servicio?.horarios_permitidos || [];
-        if (!permitidos.length) return true;
-        const normalizados = new Set(permitidos.flatMap(variantesHorarioPermitido));
-        return normalizados.has(slot);
-    };
-
-    const slotTieneDescanso = (slotStart, slotEnd, descansosDelDia = []) => {
-        return descansosDelDia.some(descanso => {
-            if (!descanso?.inicio || !descanso?.fin) return false;
-            const descansoStart = timeToMinutes(descanso.inicio);
-            const descansoEnd = timeToMinutes(descanso.fin);
-            return (slotStart < descansoEnd) && (slotEnd > descansoStart);
-        });
-    };
-
-    const crearBloquesTrabajo = (slotsDelDia = [], duracionTurno = 60, intervaloTurnos = 0) => {
-        const minutosTrabajo = slotsDelDia
-            .map(timeToMinutes)
-            .sort((a, b) => a - b);
-
-        const bloquesBase = minutosTrabajo.map((minuto, index) => {
-            const siguiente = minutosTrabajo[index + 1];
-            const anterior = minutosTrabajo[index - 1];
-            return {
-                inicio: minuto,
-                fin: siguiente ? Math.max(siguiente, minuto + duracionTurno) : 24 * 60,
-                conectaAnterior: anterior !== undefined && minuto - anterior <= duracionTurno + intervaloTurnos
-            };
-        });
-
-        const bloques = [];
-        bloquesBase.forEach(bloque => {
-            const ultimo = bloques[bloques.length - 1];
-            if (ultimo && bloque.conectaAnterior) {
-                ultimo.fin = Math.max(ultimo.fin, bloque.fin);
-            } else {
-                bloques.push({ inicio: bloque.inicio, fin: bloque.fin });
-            }
-        });
-
-        return bloques;
-    };
-
     React.useEffect(() => {
         if (!profesional) return;
         
@@ -124,12 +60,8 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
             try {
                 console.log(`📅 Cargando horarios por día de ${profesional.nombre}...`);
                 const horarios = await window.salonConfig.getHorariosPorDia(profesional.id);
-                const descansos = window.salonConfig.getDescansosPorDia ?
-                    await window.salonConfig.getDescansosPorDia(profesional.id) :
-                    {};
                 console.log(`✅ Horarios por día de ${profesional.nombre}:`, horarios);
                 setHorariosPorDia(horarios);
-                setDescansosPorDia(descansos);
                 
                 const tieneHorarios = Object.keys(horarios).length > 0;
                 if (!tieneHorarios) {
@@ -207,10 +139,6 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                 const diaSemana = diasSemana[fechaLocal.getDay()];
                 
                 const indicesDelDia = horariosPorDia[diaSemana] || [];
-                const descansosDelDia = descansosPorDia[diaSemana] || [];
-                const configGlobal = window.salonConfig ? await window.salonConfig.get() : {};
-                const duracionTurno = Number(configGlobal?.duracion_turnos || 60);
-                const intervaloTurnos = Number(configGlobal?.intervalo_entre_turnos || 0);
                 
                 if (indicesDelDia.length === 0) {
                     console.log(`⚠️ No hay horas configuradas para ${diaSemana}`);
@@ -224,13 +152,12 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                 
                 // 🔥 FILTRO POR HORARIOS PERMITIDOS DEL SERVICIO (si existen)
                 if (service.horarios_permitidos && service.horarios_permitidos.length > 0) {
-                    baseSlots = baseSlots.filter(slot => servicioPermiteHorario(service, slot));
+                    baseSlots = baseSlots.filter(slot => service.horarios_permitidos.includes(slot));
                     console.log(`📋 Slots filtrados por horarios permitidos del servicio:`, baseSlots);
                 }
                 
                 console.log(`📋 Slots base para ${diaSemana} (después de filtro de servicio):`, baseSlots);
                 
-                const bloquesTrabajo = crearBloquesTrabajo(baseSlots, duracionTurno, intervaloTurnos);
                 const todayStr = getCurrentLocalDate();
                 const esHoy = date === todayStr;
                 
@@ -238,7 +165,7 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                 const horaActual = ahora.getHours();
                 const minutosActuales = ahora.getMinutes();
                 const totalMinutosActual = horaActual * 60 + minutosActuales;
-                const minAllowedMinutes = totalMinutosActual + (minAntelacionHoras * 60);
+                const minAllowedMinutes = totalMinutosActual + 120;
                 
                 console.log('🕐 Hora actual:', `${horaActual}:${minutosActuales}`);
                 console.log('⏱️ Hora mínima permitida (actual + 2h):', 
@@ -253,15 +180,6 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
 
                     if (esHoy && slotStart < minAllowedMinutes) {
                         console.log(`⏰ Slot ${slotStartStr} es menor a hora mínima - EXCLUIDO`);
-                        return false;
-                    }
-
-                    if (!bloquesTrabajo.some(bloque => slotStart >= bloque.inicio && slotEnd <= bloque.fin)) {
-                        console.log(`Slot ${slotStartStr} no cabe antes del proximo horario - EXCLUIDO`);
-                        return false;
-                    }
-
-                    if (slotTieneDescanso(slotStart, slotEnd, descansosDelDia)) {
                         return false;
                     }
 
@@ -292,7 +210,7 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
         };
 
         loadSlots();
-    }, [service, date, profesional, horariosPorDia, descansosPorDia, diaTrabaja, verificacionCompleta, maxAntelacionDias, minAntelacionHoras]);
+    }, [service, date, profesional, horariosPorDia, diaTrabaja, verificacionCompleta, maxAntelacionDias]);
 
     if (!service || !date || !profesional) return null;
 
@@ -375,8 +293,8 @@ function TimeSlots({ service, date, profesional, onTimeSelect, selectedTime }) {
                         <div className="text-sm text-pink-600 bg-pink-50 p-3 rounded-lg flex items-center gap-2 border border-pink-200">
                             <span className="text-pink-500">⏰</span>
                             <span>
-                                Solo se muestran horarios con al menos {minAntelacionHoras} horas de anticipación 
-                                (hora actual + {minAntelacionHoras}h)
+                                Solo se muestran horarios con al menos 2 horas de anticipación 
+                                (hora actual + 2h)
                             </span>
                         </div>
                     )}
