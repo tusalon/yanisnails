@@ -1,6 +1,6 @@
 // sw.js - Service Worker para Yanis Nails
 
-const CACHE_NAME = 'yanisnails-v29';
+const CACHE_NAME = 'yanisnails-v25';
 const urlsToCache = [
   '/yanisnails/',
   '/yanisnails/index.html',
