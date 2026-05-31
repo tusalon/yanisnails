@@ -1,6 +1,6 @@
 // sw.js - Service Worker para Yanis Nails
 
-const CACHE_NAME = 'yanisnails-v29';
+const CACHE_NAME = 'yanisnails-v47';
 const urlsToCache = [
   '/yanisnails/',
   '/yanisnails/index.html',
@@ -17,7 +17,14 @@ const urlsToCache = [
   '/yanisnails/icons/icon-152x152.png',
   '/yanisnails/icons/icon-192x192.png',
   '/yanisnails/icons/icon-384x384.png',
-  '/yanisnails/icons/icon-512x512.png'
+  '/yanisnails/icons/icon-512x512.png',
+  '/yanisnails/vendor/react.production.min.js',
+  '/yanisnails/vendor/react-dom.production.min.js',
+  '/yanisnails/vendor/babel.min.js',
+  '/yanisnails/vendor/bcrypt.min.js',
+  '/yanisnails/vendor/tailwind-browser.js',
+  '/yanisnails/vendor/lucide/lucide.css',
+  '/yanisnails/vendor/lucide/lucide.woff2'
 ];
 
 // ============================================
